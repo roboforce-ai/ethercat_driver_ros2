@@ -281,7 +281,8 @@ CallbackReturn EthercatDriver::on_activate(
   }
 
   // start EC and wait until state operative
-
+  master_.setThreadRealTime();
+  master_.setThreadHighPriority();
   master_.setCtrlFrequency(control_frequency_);
 
   for (auto i = 0ul; i < ec_modules_.size(); i++) {

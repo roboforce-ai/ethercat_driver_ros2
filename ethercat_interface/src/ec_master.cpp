@@ -92,19 +92,31 @@ void EcMaster::addSlave(uint16_t alias, uint16_t position, EcSlave * slave)
   }
 
   // check and setup dc
+  /* DC sync modification performed to ensure joint
+  enter DC sync mode (suggestion from ZeroERR control)*/
+  struct timespec t;
+  clock_gettime(CLOCK_MONOTONIC, &t);
+  ecrt_master_application_time(master_, EC_NEWTIMEVAL2NANO(t));
+  ecrt_slave_config_dc(
+    slave_info.config,
+    slave->assign_activate_dc_sync(),
+    interval_,
+    interval_ - (t.tv_nsec % (interval_)),
+    0,
+    0);
 
-  if (slave->assign_activate_dc_sync()) {
-    struct timespec t;
-    clock_gettime(CLOCK_MONOTONIC, &t);
-    ecrt_master_application_time(master_, EC_NEWTIMEVAL2NANO(t));
-    ecrt_slave_config_dc(
-      slave_info.config,
-      slave->assign_activate_dc_sync(),
-      interval_,
-      interval_ - (t.tv_nsec % (interval_)),
-      0,
-      0);
-  }
+  // if (slave->assign_activate_dc_sync()) {
+  //   struct timespec t;
+  //   clock_gettime(CLOCK_MONOTONIC, &t);
+  //   ecrt_master_application_time(master_, EC_NEWTIMEVAL2NANO(t));
+  //   ecrt_slave_config_dc(
+  //     slave_info.config,
+  //     slave->assign_activate_dc_sync(),
+  //     interval_,
+  //     interval_ - (t.tv_nsec % (interval_)),
+  //     0,
+  //     0);
+  // }
 
   slave_info_.push_back(slave_info);
 
